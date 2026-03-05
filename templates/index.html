@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIA - Digital Intelligent Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 d-flex align-items-center">
+                <i class="fas fa-robot me-2" style="font-size: 1.5rem;"></i>
+                <div>
+                    <div style="font-weight: 600; font-size: 1.2rem;">DIA</div>
+                    <small style="font-size: 0.7rem; opacity: 0.9;">Digital Intelligent Assistant</small>
+                </div>
+            </span>
+            <div class="d-flex align-items-center">
+                <span id="sessionInfo" class="text-white me-3" style="font-weight: 500;"></span>
+                <button id="endSessionBtn" class="btn btn-light btn-sm shadow-sm" style="display: none; font-weight: 500;">
+                    <i class="fas fa-sign-out-alt me-1"></i>Termina Sessione
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid h-100">
+        <!-- Session Setup Modal -->
+        <div class="modal fade" id="sessionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow-lg border-0" style="border-radius: 15px; overflow: hidden;">
+                    <!-- Modal Header with Gradient -->
+                    <div class="modal-header border-0 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+                        <div>
+                            <h4 class="modal-title mb-1" style="font-weight: 600;">
+                                <i class="fas fa-rocket me-2"></i>
+                                Benvenuto nel Sistema DIA
+                            </h4>
+                            <p class="mb-0" style="font-size: 0.9rem; opacity: 0.95;">Configura la tua sessione di assemblaggio</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal Body -->
+                    <div class="modal-body p-4" style="background-color: #f8f9fa;">
+                        <form id="sessionForm">
+                            <!-- Info Card -->
+                            <div class="alert alert-info border-0 mb-4" style="background-color: #e3f2fd; border-radius: 10px;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <strong>Informazioni Importanti</strong>
+                                        <p class="mb-0 small mt-1">Il sistema DIA ti supporterà durante l'assemblaggio del calendario dell'avvento. Inserisci i tuoi dati per iniziare.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Participant Number -->
+                            <div class="mb-4">
+                                <label for="participantNumber" class="form-label fw-semibold" style="color: #495057;">
+                                    <i class="fas fa-user-circle me-2" style="color: #667eea;"></i>
+                                    Numero Partecipante
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg shadow-sm" 
+                                       id="participantNumber" 
+                                       placeholder="Es: 001" 
+                                       required
+                                       style="border-radius: 10px; border: 2px solid #e0e0e0; transition: all 0.3s;">
+                                <div class="form-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Inserisci il tuo numero identificativo univoco
+                                </div>
+                            </div>
+
+                            <!-- Job Selection -->
+                            <div class="mb-4">
+                                <label for="jobNumber" class="form-label fw-semibold" style="color: #495057;">
+                                    <i class="fas fa-briefcase me-2" style="color: #764ba2;"></i>
+                                    Seleziona Job di Assemblaggio
+                                </label>
+                                <select class="form-select form-select-lg shadow-sm" 
+                                        id="jobNumber" 
+                                        required
+                                        style="border-radius: 10px; border: 2px solid #e0e0e0; transition: all 0.3s;">
+                                    <option value="">-- Scegli la versione del calendario --</option>
+                                    <option value="1">🎄 Job 1 - Calendario Versione 1 (Unicorni Rosa)</option>
+                                    <option value="2">🎄 Job 2 - Calendario Versione 2 (Unicorni Rosa)</option>
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Seleziona quale versione del calendario dell'avvento devi assemblare
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Modal Footer -->
+                    <div class="modal-footer border-0 bg-white" style="padding: 1.5rem 2rem;">
+                        <button type="button" 
+                                class="btn btn-lg px-5 text-white shadow" 
+                                id="startSessionBtn"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; font-weight: 600; transition: transform 0.2s;">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Inizia Sessione
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="row h-100" id="mainInterface" style="display: none;">
+            <!-- Camera Section -->
+            <div class="col-lg-6 d-flex flex-column p-3">
+                <div class="card h-100">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-camera me-2"></i>
+                            Fotocamera
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <!-- Camera View -->
+                        <div class="camera-container position-relative flex-grow-1 mb-3">
+                            <video id="cameraFeed" class="w-100 h-100 rounded" autoplay playsinline muted></video>
+                            <canvas id="captureCanvas" style="display: none;"></canvas>
+                            
+                            <!-- Camera Overlay -->
+                            <div class="camera-overlay position-absolute top-50 start-50 translate-middle text-center text-white">
+                                <div id="cameraStatus">
+                                    <i class="fas fa-video-slash fa-3x mb-2"></i>
+                                    <p>Clicca "Attiva Camera" per iniziare</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camera Controls -->
+                        <div class="camera-controls d-flex gap-2 justify-content-center">
+                            <button id="toggleCameraBtn" class="btn btn-primary">
+                                <i class="fas fa-video me-1"></i>
+                                Attiva Camera
+                            </button>
+                            <button id="captureBtn" class="btn btn-success" disabled>
+                                <i class="fas fa-camera me-1"></i>
+                                Scatta Foto
+                            </button>
+                            <button id="sendImageBtn" class="btn btn-info" style="display: none;">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Analizza Immagine
+                            </button>
+                        </div>
+
+                        <!-- Camera Selector -->
+                        <div class="camera-selector mt-3 text-center">
+                            <label for="cameraSelect" class="form-label mb-1">
+                                <i class="fas fa-camera-rotate me-1"></i>
+                                <small>Seleziona Fotocamera:</small>
+                            </label>
+                            <select id="cameraSelect" class="form-select form-select-sm" style="max-width: 300px; margin: 0 auto;">
+                                <option value="">Caricamento fotocamere...</option>
+                            </select>
+                        </div>
+
+                        <!-- Captured Image Preview -->
+                        <div id="imagePreview" class="mt-3" style="display: none;">
+                            <h6>Immagine Catturata:</h6>
+                            <img id="capturedImage" class="img-fluid rounded border" style="max-height: 200px;">
+                            <div class="mt-2">
+                                <button id="retakeBtn" class="btn btn-outline-secondary btn-sm me-2">
+                                    <i class="fas fa-redo me-1"></i>
+                                    Scatta di Nuovo
+                                </button>
+                                <button id="confirmImageBtn" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check me-1"></i>
+                                    Conferma
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="col-lg-6 d-flex flex-column p-3">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Chat DIA
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column p-0">
+                        <!-- Chat Messages -->
+                        <div id="chatMessages" class="flex-grow-1 p-3 overflow-auto">
+                            <div class="message system-message">
+                                <div class="message-content">
+                                    <i class="fas fa-robot me-2"></i>
+                                    <strong>Benvenuto nel DIA!</strong>
+                                    <p class="mb-0">Sono qui per aiutarti nell'assemblaggio del calendario dell'avvento. Puoi:</p>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Farmi domande su dove posizionare gli oggetti</li>
+                                        <li>Scattare foto per analizzare oggetti o scatole</li>
+                                        <li>Chiedermi aiuto per verificare l'assemblaggio</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="chat-input-container border-top p-3">
+                            <!-- Voice Control Toggle -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-keyboard me-1"></i>
+                                    <span id="inputModeText">Modalità Testo</span>
+                                </small>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="voiceOutputToggle" checked>
+                                    <label class="form-check-label" for="voiceOutputToggle">
+                                        <i class="fas fa-volume-up me-1"></i>
+                                        <small>Audio Risposta</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Microphone Selector -->
+                            <div class="microphone-selector mb-2">
+                                <label for="microphoneSelect" class="form-label mb-1">
+                                    <i class="fas fa-microphone me-1"></i>
+                                    <small>Seleziona Microfono:</small>
+                                </label>
+                                <select id="microphoneSelect" class="form-select form-select-sm">
+                                    <option value="">Microfono predefinito</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <button id="voiceInputBtn" class="btn btn-outline-secondary" type="button" title="Input vocale">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <input type="text" id="messageInput" class="form-control" 
+                                       placeholder="Scrivi un messaggio o usa il microfono..." 
+                                       autocomplete="off">
+                                <button id="sendMessageBtn" class="btn btn-primary" type="button" title="Invia messaggio">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Voice Recording Indicator -->
+                            <div id="voiceRecordingIndicator" class="mt-2 text-center" style="display: none;">
+                                <span class="badge bg-danger pulse">
+                                    <i class="fas fa-microphone me-1"></i>
+                                    In ascolto... Parla ora
+                                </span>
+                            </div>
+                            
+                            <div class="form-text mt-1">
+                                <small>
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Premi Invio, usa il microfono o scatta una foto
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Elaborazione in corso...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

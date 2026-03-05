@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  dia-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dia-assistant
+    ports:
+      - "5000:5000"
+    privileged: true
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    volumes:
+      # Mount content directories for persistence
+      - ./content:/app/content
+      - ./DIA_METRICS:/app/DIA_METRICS
+      - ./static:/app/static
+      - ./templates:/app/templates
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - CHROMA_SERVER_NOFILE=65535
+      - ALLOW_RESET=TRUE
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - dia-network
+
+networks:
+  dia-network:
+    driver: bridge

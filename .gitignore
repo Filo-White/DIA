@@ -1,0 +1,34 @@
+# Git ignore file
+
+# Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data files
+*.xlsx
+*.csv
+*.log
+
+# Application data
+content/archivio/
+content/not_useful/
+DIA_METRICS/
+chroma_db/
+
+
