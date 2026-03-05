@@ -1,5 +1,9 @@
 # DIA - Digital Intelligent Assistant
 
+<p align="center">
+  <img src="DIA_logo/DIA_logo.png" width="400">
+</p>
+
 A multimodal AI-powered assistant leveraging Retrieval-Augmented Generation (RAG) to support operators in industrial assembly processes.
 
 ## Overview
